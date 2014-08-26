@@ -1,8 +1,10 @@
 #include "state-machine.h"
 #include <stdio.h>
 
-#if 1
+#if 0
 #define LOGV(...) printf("\n" __VA_ARGS__)
+#else
+#define LOGV(...)
 #endif
 
 int run_machine(StateMachine_t *machine) {
