@@ -4,7 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += main.c \
-    state-machine.c
+    state-machine.c \
+    message-queue.c
 
 HEADERS += \
-    state-machine.h
+    state-machine.h \
+    message-queue.h
