@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <state-machine.h>
+#include <message-queue.h>
 
 #define LOGV(...) printf("\n" __VA_ARGS__)
 
@@ -63,8 +64,12 @@ int main(void)
     sm.next_state = stopped;
     sm.run = 1;
 
+#if 0
     LOGV("Starting the machine..\n");
     run_machine(&sm);
     LOGV("Machine finised..\n");
+#endif
+
+    mq_test();
     return 0;
 }
