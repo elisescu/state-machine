@@ -13,6 +13,7 @@ MessageQueue_t* mq_create() {
     MessageQueue_t *queue = (MessageQueue_t*) malloc(sizeof(MessageQueue_t));
     queue->dequeue_head = queue->queue_head = NULL;
     queue->no_messages = 0;
+    queue->force_quit = 0;
     queue->mutex = (pthread_mutex_t*) malloc(sizeof(pthread_mutex_t));
     pthread_mutex_init(queue->mutex, NULL);
     queue->cond = (pthread_cond_t*) malloc(sizeof(pthread_cond_t));
@@ -52,10 +53,12 @@ Message_t* mq_dequeue_message_wait(MessageQueue_t *queue) {
     Message_t *m = NULL;
     pthread_mutex_lock(queue->mutex);
     LOG("Dequeuing message. Currently having %d messages", queue->no_messages);
-    while (queue->no_messages < 1) {
+    while (queue->no_messages < 1 && !queue->force_quit) {
         LOG("No message in the queue. Waiting for one...");
         int r = pthread_cond_wait(queue->cond, queue->mutex);
     }
+    if (queue->force_quit) return NULL;
+
     queue->no_messages--;
     m = queue->dequeue_head;
     if (queue->dequeue_head) {
@@ -103,6 +106,7 @@ int mq_empty(MessageQueue_t *queue) {
 
 void mq_signal(MessageQueue_t *mq) {
     pthread_mutex_lock(mq->mutex);
+    mq->force_quit = 1;
     pthread_cond_signal(mq->cond);
     pthread_mutex_unlock(mq->mutex);
 }

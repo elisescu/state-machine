@@ -41,6 +41,7 @@ typedef struct StateMachine_s {
     MessageQueue_t *machine_queue;
     pthread_t *machine_thread;
     int machine_running;
+    int machine_finished;
     pthread_cond_t *machine_cond;
     pthread_mutex_t *machine_mutex;
 } StateMachine_t;

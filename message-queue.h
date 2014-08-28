@@ -16,6 +16,7 @@ typedef struct MessageQueue_s {
     Message_t *queue_head;
     Message_t *dequeue_head;
     uint32_t no_messages;
+    uint32_t force_quit;
     pthread_mutex_t *mutex;
     pthread_cond_t *cond;
 } MessageQueue_t;

@@ -32,12 +32,13 @@ void* run_machine(void *data) {
             break;
         }
         Message_t *msg = mq_dequeue_message_wait(machine->machine_queue);
-        State_t *next_state = (State_t*) msg->data;
-        char *state_name = (next_state->state_name) ? next_state->state_name : "NULL";
-        if (next_state == NULL) {
+        if (msg == NULL || msg->data == NULL) {
             LOGV(" no state left to run for the machine");
             break;
         }
+        State_t *next_state = (State_t*) msg->data;
+        free(msg);
+        char *state_name = (next_state->state_name) ? next_state->state_name : "NULL";
         if (next_state->enter) {
             LOGV(" entering to state %s", state_name);
             if (next_state->enter(machine, next_state) == SM_EXIT) {
@@ -67,6 +68,7 @@ void* run_machine(void *data) {
     }
     pthread_mutex_lock(machine->machine_mutex);
     pthread_cond_signal(machine->machine_cond);
+    machine->machine_finished = 1;
     pthread_mutex_unlock(machine->machine_mutex);
     LOGV(" main loop of the machine finished.");
     return NULL;
@@ -89,7 +91,10 @@ void sm_finish(StateMachine_t *machine, int wait) {
     machine->machine_running = 0;
     if (wait) {
         LOGV("Waiting for the machine to finish");
-        pthread_cond_wait(machine->machine_cond, machine->machine_mutex);
+        mq_signal(machine->machine_queue);
+        if (!machine->machine_finished) {
+            pthread_cond_wait(machine->machine_cond, machine->machine_mutex);
+        }
         LOGV("Machine finshed execution!");
     }
     pthread_mutex_unlock(machine->machine_mutex);
