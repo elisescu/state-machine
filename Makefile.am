@@ -7,5 +7,5 @@ AM_CXXFLAGS = -O2
 endif
 
 bin_PROGRAMS = sm
-sm_SOURCES = main.c state-machine.c message-queue.c state-machine.h message-queue.h
+sm_SOURCES = main.c state-machine.c message-queue.c state-machine.h message-queue.h test-sm.c
 AM_LDFLAGS = -pthread

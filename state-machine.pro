@@ -5,10 +5,12 @@ CONFIG -= qt
 
 SOURCES += main.c \
     state-machine.c \
-    message-queue.c
+    message-queue.c \
+    test-sm.c
 
 HEADERS += \
     state-machine.h \
-    message-queue.h
+    message-queue.h \
+    test-sm.h
 
 LIBS += -pthread

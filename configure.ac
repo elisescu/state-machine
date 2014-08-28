@@ -29,7 +29,7 @@ AC_PROG_CC
 AC_CHECK_LIB(pthread, pthread_create)
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdint.h stdlib.h])
+AC_CHECK_HEADERS([stdint.h stdlib.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_UINT16_T
