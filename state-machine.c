@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if 1
+#if 0
 #define LOGV(...) printf("\n" __VA_ARGS__)
 #else
 #define LOGV(...)

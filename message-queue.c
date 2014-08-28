@@ -3,7 +3,7 @@
 
 #include "message-queue.h"
 
-#if 1
+#if 0
 #define LOG(...) {printf("\n" __VA_ARGS__); fflush(stdout);}
 #else
 #define LOG(...)
