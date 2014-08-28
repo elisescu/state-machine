@@ -6,6 +6,6 @@ AM_CFLAGS = -O2
 AM_CXXFLAGS = -O2
 endif
 
-bin_PROGRAMS=sm
-sm_SOURCES=main.c state-machine.c state-machine.h message-queue.c message-queue.h
-
+bin_PROGRAMS = sm
+sm_SOURCES = main.c state-machine.c message-queue.c state-machine.h message-queue.h
+AM_LDFLAGS = -pthread

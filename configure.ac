@@ -26,6 +26,7 @@ AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
 AC_PROG_CC
 
 # Checks for libraries.
+AC_CHECK_LIB(pthread, pthread_create)
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h stdlib.h])

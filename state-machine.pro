@@ -10,3 +10,5 @@ SOURCES += main.c \
 HEADERS += \
     state-machine.h \
     message-queue.h
+
+LIBS += -pthread

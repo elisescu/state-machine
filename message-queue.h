@@ -13,10 +13,11 @@ typedef struct Message_s {
 } Message_t;
 
 typedef struct MessageQueue_s {
-   Message_t *queue_head;
-   Message_t *dequeue_head;
-   uint32_t no_messages;
-   pthread_mutex_t *mutex;
+    Message_t *queue_head;
+    Message_t *dequeue_head;
+    uint32_t no_messages;
+    pthread_mutex_t *mutex;
+    pthread_cond_t *cond;
 } MessageQueue_t;
 
 
@@ -24,6 +25,10 @@ MessageQueue_t* mq_create();
 void mq_destroy(MessageQueue_t *queue);
 void mq_queue_message(MessageQueue_t *queue, Message_t *m);
 Message_t* mq_dequeue_message(MessageQueue_t *queue);
+Message_t* mq_dequeue_message_wait(MessageQueue_t *queue);
+Message_t *mq_message_create();
+void mq_message_destroy(Message_t *msg);
+void mq_signal(MessageQueue_t *mq);
 int mq_test();
 
 
