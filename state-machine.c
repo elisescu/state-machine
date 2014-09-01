@@ -33,6 +33,7 @@ void* run_machine(void *data) {
     StateMachine_t *machine = (StateMachine_t *) data;
     State_t *curr_state = machine->init_state;
     char *state_name = (curr_state->state_name) ? curr_state->state_name : "NULL";
+    machine->machine_finished = 0;
 
     // ENTER the initial state
     if (curr_state->enter) {
