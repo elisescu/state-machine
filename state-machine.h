@@ -102,4 +102,10 @@ void sm_send_state_message(StateMachine_t *sm, StateMessage_t *state_message);
  */
 void sm_finish(StateMachine_t *machine, int wait);
 
+/**
+ * @brief sm_destroy release and free the state machine and its resources.
+ * @param machine the state machine.
+ */
+void sm_destroy(StateMachine_t *machine);
+
 #endif // STATEMACHINE_H

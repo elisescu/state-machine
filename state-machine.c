@@ -21,6 +21,14 @@ StateMachine_t* sm_create(char *name) {
     return machine;
 }
 
+void sm_destroy(StateMachine_t *machine) {
+    pthread_mutex_destroy(machine->machine_mutex);
+    pthread_cond_destroy(machine->machine_cond);
+    free(machine->machine_thread);
+    mq_destroy(machine->machine_queue);
+    free(machine);
+}
+
 void* run_machine(void *data) {
     StateMachine_t *machine = (StateMachine_t *) data;
     State_t *curr_state = machine->init_state;
