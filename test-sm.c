@@ -122,6 +122,7 @@ int test_1() {
 
 
     sm_finish(sm, 1);
+    sm_destroy(sm);
     state_trace[state_trace_length] = '\0';
     if (strcmp(state_trace, expected_result) == 0) {
         LOGV("Test passed! --> OK");
@@ -193,6 +194,7 @@ int test_2() {
 
 
     sm_finish(sm, 1);
+    sm_destroy(sm);
     state_trace[state_trace_length] = '\0';
     if (strcmp(state_trace, expected_result) == 0) {
         LOGV("Test passed! --> OK");
