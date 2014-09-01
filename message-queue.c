@@ -55,7 +55,7 @@ Message_t* mq_dequeue_message_wait(MessageQueue_t *queue) {
     LOG("Dequeuing message. Currently having %d messages", queue->no_messages);
     while (queue->no_messages < 1 && !queue->force_quit) {
         LOG("No message in the queue. Waiting for one...");
-        int r = pthread_cond_wait(queue->cond, queue->mutex);
+        pthread_cond_wait(queue->cond, queue->mutex);
     }
     if (queue->force_quit) return NULL;
 
@@ -98,6 +98,7 @@ Message_t *mq_message_create() {
     m->data = NULL;
     m->data_length = 0;
     m->next = m->prev = NULL;
+    return m;
 }
 
 int mq_empty(MessageQueue_t *queue) {
