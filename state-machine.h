@@ -4,33 +4,52 @@
 #include "message-queue.h"
 #include <pthread.h>
 
+// private section
+enum {
+    MSG_STATE_TRANSIT = 0,
+    MSG_STATE_MESSAGE = 1,
+    MSG_MACHINE_EXIT =2
+};
+
+typedef struct SMachineMessage_s{
+    uint32_t message_type;
+    void *data;
+} SMachineMessage_t;
+
+// public section
 enum {
     SM_OK = 0,
     SM_EXIT = 1,
     SM_ERROR = 2
 };
 
+typedef struct StateMessage_s {
+    uint32_t message_type;
+    uint32_t val1;
+    uint32_t val2;
+    void *obj;
+} StateMessage_t;
+
 struct StateMachine_s;
 struct State_s;
 
-typedef int (*StateEnterFunction_T)(struct StateMachine_s *, struct State_s *);
-typedef int (*StateExitFunction_T)(struct StateMachine_s *, struct State_s *);
-typedef int (*StateRunFunction_T)(struct StateMachine_s *, struct State_s *);
+typedef void (*StateEnterFunction_T)(struct StateMachine_s *, struct State_s *);
+typedef void (*StateExitFunction_T)(struct StateMachine_s *, struct State_s *);
+typedef void (*StateProcessMessageFunction_T)(struct StateMachine_s *, struct State_s *, StateMessage_t *msg);
 
 typedef struct State_s {
     /**
      * @brief enter is the function to execute when entering to the state. Can be NULL.
-     * Return SM_EXIT to stop the state machine.
      */
     StateEnterFunction_T enter;
     /**
-     * @brief run is the state function to be executed. Cannot be NULL. If NULL the state machine will stop.
-     * Return SM_EXIT to stop the state machine.
+     * @brief processMessage is the function to execute when a message has been sent to the
+     * state machine. It will be called on the current state of the machine, when the message
+     * has been dequeued from the queue.
      */
-    StateRunFunction_T run;
+    StateProcessMessageFunction_T processMessage;
     /**
      * @brief exit is the function to execute when exiting from the current state. Can be NULL.
-     * Return SM_EXIT to stop the state machine.
      */
     StateExitFunction_T exit;
     char *state_name;
@@ -40,10 +59,10 @@ typedef struct StateMachine_s {
     char *machine_name;
     MessageQueue_t *machine_queue;
     pthread_t *machine_thread;
-    int machine_running;
     int machine_finished;
     pthread_cond_t *machine_cond;
     pthread_mutex_t *machine_mutex;
+    State_t *init_state;
 } StateMachine_t;
 
 /**
@@ -56,8 +75,9 @@ StateMachine_t* sm_create(char *name);
 /**
  * @brief starts the state machine which will wait for new states to be queued in order to transit to them.
  * @param machine the machine to start.
+ * @param init_state the initial state of the machine.
  */
-void start_machine(StateMachine_t *machine);
+void start_machine(StateMachine_t *machine, State_t *init_state);
 
 /**
  * @brief sm_transit_to adds a new state to the states queue and notifies the state machine to run
@@ -66,6 +86,14 @@ void start_machine(StateMachine_t *machine);
  * @param new_state the new state to transit to.
  */
 void sm_transit_to(StateMachine_t *sm, State_t *new_state);
+
+/**
+ * @brief sm_send_state_message send a message to the state machine to be processed by the current
+ * state.
+ * @param sm the state machine.
+ * @param state_message the message to send.
+ */
+void sm_send_state_message(StateMachine_t *sm, StateMessage_t *state_message);
 
 /**
  * @brief sm_finish finish the state machine execution.

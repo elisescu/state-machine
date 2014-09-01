@@ -4,7 +4,7 @@
 #include "message-queue.h"
 
 #if 0
-#define LOG(...) {printf("\n" __VA_ARGS__); fflush(stdout);}
+#define LOG(...) {printf("\nmessage_queue: " __VA_ARGS__); fflush(stdout);}
 #else
 #define LOG(...)
 #endif
@@ -36,7 +36,7 @@ void mq_queue_message(MessageQueue_t *queue, Message_t *m) {
     queue->no_messages++;
     m->next = NULL;
     m->prev = queue->queue_head;
-    LOG("Queueing message %d, now having %d messages", m->message_type, queue->no_messages);
+    LOG("Queueing messaage 0x%X, now having %d messages", m, queue->no_messages);
     if (queue->no_messages == 1) {
         queue->dequeue_head = m;
         LOG("Now the queue has got the first message. Waking others..");
@@ -52,7 +52,6 @@ void mq_queue_message(MessageQueue_t *queue, Message_t *m) {
 Message_t* mq_dequeue_message_wait(MessageQueue_t *queue) {
     Message_t *m = NULL;
     pthread_mutex_lock(queue->mutex);
-    LOG("Dequeuing message. Currently having %d messages", queue->no_messages);
     while (queue->no_messages < 1 && !queue->force_quit) {
         LOG("No message in the queue. Waiting for one...");
         pthread_cond_wait(queue->cond, queue->mutex);
@@ -71,6 +70,7 @@ Message_t* mq_dequeue_message_wait(MessageQueue_t *queue) {
     pthread_mutex_unlock(queue->mutex);
     m->next = NULL;
     m->prev = NULL;
+    LOG("Dequeuing message 0x%X. Currently having %d messages", m, queue->no_messages);
     return m;
 }
 
@@ -90,26 +90,19 @@ Message_t* mq_dequeue_message(MessageQueue_t *queue) {
     pthread_mutex_unlock(queue->mutex);
     m->next = NULL;
     m->prev = NULL;
+    LOG("Dequeuing message 0x%X. Currently having %d messages", m, queue->no_messages);
     return m;
 }
 
 Message_t *mq_message_create() {
     Message_t *m = (Message_t*) malloc(sizeof(Message_t));
     m->data = NULL;
-    m->data_length = 0;
     m->next = m->prev = NULL;
     return m;
 }
 
 int mq_empty(MessageQueue_t *queue) {
     return queue->dequeue_head == queue->queue_head;
-}
-
-void mq_signal(MessageQueue_t *mq) {
-    pthread_mutex_lock(mq->mutex);
-    mq->force_quit = 1;
-    pthread_cond_signal(mq->cond);
-    pthread_mutex_unlock(mq->mutex);
 }
 
 int mq_test() {
@@ -124,14 +117,13 @@ int mq_test() {
         LOG(" - queue message %d", i);
         //Message_t *msg = &msgs_[i];
         Message_t *msg = (Message_t*) malloc(sizeof(Message_t));
-        msg->message_type = i;
         mq_queue_message(queue, msg);
     }
 
     LOG("Having %d messages in the queue:", queue->no_messages);
     for (;queue->no_messages > 0;) {
         Message_t *msg = mq_dequeue_message(queue);
-        LOG(" - dequeue message %d ", msg->message_type);
+        LOG(" - dequeue message 0x%X", msg);
     }
 
     LOG("Now we have %d messages, (deque_head==queue_head) = %d\n", queue->no_messages, queue->dequeue_head == queue->queue_head);
