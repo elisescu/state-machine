@@ -25,8 +25,8 @@ MessageQueue_t* mq_create() {
 void mq_destroy(MessageQueue_t *queue) {
     pthread_mutex_destroy(queue->mutex);
     pthread_cond_destroy(queue->cond);
-    //TODO: free all messages in the queue if any
     free(queue->mutex);
+    free(queue->cond);
     free(queue);
     LOG("Queue destroyed");
 }

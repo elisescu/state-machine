@@ -24,8 +24,11 @@ StateMachine_t* sm_create(char *name) {
 void sm_destroy(StateMachine_t *machine) {
     pthread_mutex_destroy(machine->machine_mutex);
     pthread_cond_destroy(machine->machine_cond);
-    free(machine->machine_thread);
+    free(machine->machine_mutex);
+    free(machine->machine_cond);
     mq_destroy(machine->machine_queue);
+    pthread_join(*machine->machine_thread, NULL);
+    free(machine->machine_thread);
     free(machine);
 }
 
@@ -142,19 +145,21 @@ void sm_transit_to(StateMachine_t *sm, State_t *new_state) {
 
 void sm_finish(StateMachine_t *machine, int wait) {
     LOGV("Finishing the state machine.");
-    SMachineMessage_t *m_msg = (SMachineMessage_t *) malloc(sizeof(SMachineMessage_t));
-    m_msg->message_type = MSG_MACHINE_EXIT;
-    Message_t *msg = mq_message_create();
-    msg->data = (void*) m_msg;
-    mq_queue_message(machine->machine_queue, msg);
+    if (!machine->machine_finished) {
+        SMachineMessage_t *m_msg = (SMachineMessage_t *) malloc(sizeof(SMachineMessage_t));
+        m_msg->message_type = MSG_MACHINE_EXIT;
+        Message_t *msg = mq_message_create();
+        msg->data = (void*) m_msg;
+        mq_queue_message(machine->machine_queue, msg);
 
-    if (wait) {
-        LOGV("Waiting for the machine to finish");
-        pthread_mutex_lock(machine->machine_mutex);
-        if (!machine->machine_finished) {
-            pthread_cond_wait(machine->machine_cond, machine->machine_mutex);
+        if (wait) {
+            LOGV("Waiting for the machine to finish");
+            pthread_mutex_lock(machine->machine_mutex);
+            if (!machine->machine_finished) {
+                pthread_cond_wait(machine->machine_cond, machine->machine_mutex);
+            }
+            pthread_mutex_unlock(machine->machine_mutex);
+            LOGV("Machine finshed execution!");
         }
-        pthread_mutex_unlock(machine->machine_mutex);
-        LOGV("Machine finshed execution!");
     }
 }
