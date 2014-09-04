@@ -122,7 +122,49 @@ int test_1() {
 
 
     sm_finish(sm, 1);
-    sm_destroy(sm);
+    state_trace[state_trace_length] = '\0';
+    if (strcmp(state_trace, expected_result) == 0) {
+        LOGV("Test passed! --> OK");
+        LOGV("State machine trace: %s ", state_trace);
+    } else {
+        LOGV("Test failed! --> ERROR");
+        LOGV("actual result:   %s", state_trace);
+        LOGV("expected result: %s", expected_result);
+    }
+
+
+    LOGV("\n\n TEST 1 -second round ");
+
+    // start the machine in STATE s1
+    LOGV("Starting the state machine");
+    start_machine(sm, s1);
+    state_trace_length = 0;
+
+
+    // sending 2 messages to the machine
+    msg.message_type = 3;
+    msg.obj = (void*)"*";
+    sm_send_state_message(sm, &msg);
+    msg2.message_type = 3;
+    msg2.obj = (void*)"#";
+    sm_send_state_message(sm, &msg2);
+
+    // transit to STATE s2
+    sm_transit_to(sm, s2);
+
+    LOGV("Sleeping for a while now.");
+    sleep(2);
+    LOGV("Slept 2 seconds.");
+
+    // here we should already be in STATE s3
+    // send another message to the machine
+    msg3.message_type = 3;
+    msg3.obj = (void *) "-";
+    sm_send_state_message(sm, &msg3);
+
+
+    sm_finish(sm, 1);
+
     state_trace[state_trace_length] = '\0';
     if (strcmp(state_trace, expected_result) == 0) {
         LOGV("Test passed! --> OK");
@@ -133,6 +175,7 @@ int test_1() {
         LOGV("actual result:   %s", state_trace);
         LOGV("expected result: %s", expected_result);
     }
+    sm_destroy(sm);
     return 0;
 }
 
